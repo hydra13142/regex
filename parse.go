@@ -2,52 +2,51 @@ package regex
 
 func parse(s []byte) []token {
 	p := make([]token, 0, 128)
-	i, j, k, c := 0, 0, 0, 0
-	t := token{}
-	for ; len(s) != 0; s = s[j:] {
-		t.dtl, t.typ = 0, int(s[0])
-		j = 1
+	d, i, j, k := 0, 1, 1, 0
+	t, c := token{}, 1
+	for ; len(s) != 0; s = s[d:] {
+		d, t.dtl, t.typ = 1, 0, int(s[0])
 		switch s[0] {
 		case '(':
 			if len(s) > 2 && s[1] == '?' {
 				switch s[2] {
 				case ':':
-					j, t.dtl = 3, ':'
+					d, t.dtl = 3, ':'
+					j, t.pr1 = j+1, j
 				case '>':
-					j, t.dtl = 3, '>'
+					d, t.dtl = 3, '>'
 					k, t.pr1 = k+1, k
 				case '=':
-					j, t.dtl = 3, '='
+					d, t.dtl = 3, '='
 					k, t.pr1 = k+1, k
 				case '!':
-					j, t.dtl = 3, '!'
+					d, t.dtl = 3, '!'
 					k, t.pr1 = k+1, k
 				case '<':
 					if len(s) > 3 {
 						switch s[3] {
 						case '=':
-							j, t.dtl = 4, '+'
+							d, t.dtl = 4, '+'
 							k, t.pr1 = k+1, k
 						case '!':
-							j, t.dtl = 4, '-'
+							d, t.dtl = 4, '-'
 							k, t.pr1 = k+1, k
 						}
 					}
 				}
 			} else {
-				i++
-				t.pr1 = i
+				i, t.pr1 = i+1, i
 			}
 		case '|', ')':
 			/**/
 		case '?', '*', '+':
 			if len(s) > 1 && s[1] == '?' {
-				j, t.dtl = 2, '?'
+				d, t.dtl = 2, '?'
 			}
 		case '{':
-			j = limited(&t, s)
+			d = limited(&t, s)
 		case '@', '#':
-			j = certain(&t, s)
+			d = certain(&t, s)
 		case '^', '$':
 			t.typ, t.dtl = 'b', t.typ
 		case '\\':
@@ -58,10 +57,10 @@ func parse(s []byte) []token {
 				case 'b', 'B':
 					fallthrough
 				case 'z', 'Z':
-					j, t.typ, t.dtl = 2, 'b', int(s[1])
+					d, t.typ, t.dtl = 2, 'b', int(s[1])
 				default:
 					t.typ = 'c'
-					j = decode(t.unt.zero(), s, &c)
+					d = decode(t.unt.zero(), s, &c)
 				}
 			}
 		case '.':
@@ -69,15 +68,14 @@ func parse(s []byte) []token {
 			t.unt.full().cls(0)
 		case '[':
 			t.typ = 'c'
-			j = bracket(t.unt.zero(), s)
+			d = bracket(t.unt.zero(), s)
 		default:
-			c, t.typ = t.typ, 'c'
-			t.unt.zero().set(byte(c))
-			break
+			t.typ = 'c'
+			t.unt.zero().set(s[0])
 		}
-		if j == 0 {
-			j, c, t.typ = 1, t.typ, 'c'
-			t.unt.zero().set(byte(c))
+		if d == 0 {
+			d, t.typ = 1, 'c'
+			t.unt.zero().set(s[0])
 		}
 		p = append(p, t)
 	}

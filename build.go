@@ -62,6 +62,6 @@ func (this *content) work(t []token) *Regex {
 	tail(ans.dad.end, nil).valu.typ = 'E'
 	reduce(&ans.dad, "")
 	ans.sub = this.sub
-	ans.grp = this.whl
+	ans.grp = len(this.grp)
 	return ans
 }

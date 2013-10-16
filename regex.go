@@ -10,9 +10,9 @@ type group struct {
 // It can match self in expression.
 // It can browse forward / backward.
 type Regex struct {
+	grp int
 	dad plan
 	sub []plan
-	grp int
 }
 
 func (this *Regex) before(g []group, v plan, s []byte, k int) int {
