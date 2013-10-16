@@ -3,10 +3,10 @@ package regex
 type unit [8]uint32
 
 var (
-	digit unit
-	alpha unit
-	space unit
-	label unit
+	space = &unit{0x00003e00, 0x00000001, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000}
+	digit = &unit{0x00000000, 0x03ff0000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000}
+	alpha = &unit{0x00000000, 0x00000000, 0x07fffffe, 0x07fffffe, 0x00000000, 0x00000000, 0x00000000, 0x00000000}
+	label = &unit{0x00000000, 0x03ff0000, 0x87fffffe, 0x07fffffe, 0x00000000, 0x00000000, 0x00000000, 0x00000000}
 )
 
 func (u *unit) set(i byte) *unit {
@@ -25,63 +25,67 @@ func (u *unit) get(i byte) bool {
 
 func (u *unit) add(p *unit) *unit {
 	for i := 0; i < 8; i++ {
-		(*u)[i] |= (*p)[i]
+		u[i] |= p[i]
 	}
 	return u
 }
 
-func (u *unit) addnot(p *unit) *unit {
+func (u *unit) dec(p *unit) *unit {
 	for i := 0; i < 8; i++ {
-		(*u)[i] |= ^(*p)[i]
+		u[i] &= ^p[i]
 	}
 	return u
 }
 
 func (u *unit) full() *unit {
 	for i := 0; i < 8; i++ {
-		(*u)[i] = ^uint32(1)
+		u[i] = ^uint32(1)
 	}
 	return u
 }
 
 func (u *unit) zero() *unit {
 	for i := 0; i < 8; i++ {
-		(*u)[i] = 0
+		u[i] = 0
 	}
 	return u
 }
 
 func (u *unit) nega() *unit {
 	for i := 0; i < 8; i++ {
-		(*u)[i] = ^(*u)[i]
+		u[i] = ^u[i]
 	}
 	return u
 }
 
-func init() {
+func both(a *unit, b *unit) *unit {
+	p := &unit{}
 	for i := 0; i < 8; i++ {
-		digit[i] = 0
-		alpha[i] = 0
-		space[i] = 0
-		label[i] = 0
+		p[i] = a[i] & b[i]
 	}
-	for i := '0'; i <= '9'; i++ {
-		label.set(byte(i))
-		digit.set(byte(i))
+	return p
+}
+
+func or(a *unit, b *unit) *unit {
+	p := &unit{}
+	for i := 0; i < 8; i++ {
+		p[i] = a[i] | b[i]
 	}
-	for i := 'A'; i <= 'Z'; i++ {
-		label.set(byte(i))
-		alpha.set(byte(i))
+	return p
+}
+
+func xor(a *unit, b *unit) *unit {
+	p := &unit{}
+	for i := 0; i < 8; i++ {
+		p[i] = a[i] ^ b[i]
 	}
-	for i := 'a'; i <= 'z'; i++ {
-		label.set(byte(i))
-		alpha.set(byte(i))
+	return p
+}
+
+func not(u *unit) *unit {
+	p := &unit{}
+	for i := 0; i < 8; i++ {
+		p[i] = ^u[i]
 	}
-	label.set('-')
-	space.set(' ')
-	space.set('\r')
-	space.set('\n')
-	space.set('\t')
-	space.set('\v')
-	space.set('\f')
+	return p
 }

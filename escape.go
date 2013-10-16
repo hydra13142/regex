@@ -36,21 +36,21 @@ func decode(u *unit, s []byte, c *int) int {
 			n = '\f'
 			u.set(byte(n))
 		case 's':
-			u.add(&space)
+			u.add(space)
 		case 'S':
-			u.addnot(&space)
+			u.add(not(space))
 		case 'c':
-			u.add(&alpha)
+			u.add(alpha)
 		case 'C':
-			u.addnot(&alpha)
+			u.add(not(alpha))
 		case 'd':
-			u.add(&digit)
+			u.add(digit)
 		case 'D':
-			u.addnot(&digit)
+			u.add(not(digit))
 		case 'w':
-			u.add(&label)
+			u.add(label)
 		case 'W':
-			u.addnot(&label)
+			u.add(not(label))
 		case 'x':
 			i = 2 + hex(&n, s[2:], 2)
 			if i == 2 {
