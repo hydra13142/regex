@@ -10,40 +10,47 @@ func (this *content) option(s plan, t token) plan {
 }
 
 func (this *content) repeat(s plan, t token) plan {
+	m := new(spot)
 	n := new(spot)
+	m.next = s.bgn
+	s.end.next = n
 	head(s.end, s.bgn).valu.typ = 0
 	if t.dtl == '?' {
 		head(s.bgn, n).valu.typ = 0
 	} else {
 		tail(s.bgn, n).valu.typ = 0
 	}
-	s.end.next = n
-	s.end = n
+	head(m, s.bgn).valu.typ = 0
+	s.bgn, s.end = m, n
 	return s
 }
 
 func (this *content) beyond(s plan, t token) plan {
+	m := new(spot)
 	n := new(spot)
+	m.next = s.bgn
+	s.end.next = n
 	head(s.end, s.bgn).valu.typ = 0
 	if t.dtl == '?' {
 		head(s.end, n).valu.typ = 0
 	} else {
 		tail(s.end, n).valu.typ = 0
 	}
-	s.end.next = n
-	s.end = n
+	head(m, s.bgn).valu.typ = 0
+	s.bgn, s.end = m, n
 	return s
 }
 
 func (this *content) region(s plan, t token) plan {
 	a := plan{}
+	b := a
 	a.bgn = new(spot)
 	a.end = a.bgn
 	i, j, k := t.pr1, t.pr2, 0
 	if i == j {
 		if i != 0 {
 			for k = 1; k < i; k++ {
-				b := same(s)
+				b = same(s)
 				head(a.end, b.bgn).valu.typ = 0
 				a.end.next = b.bgn
 				a.end = b.end
@@ -58,7 +65,7 @@ func (this *content) region(s plan, t token) plan {
 		}
 	} else {
 		for k = 0; k < i; k++ {
-			b := same(s)
+			b = same(s)
 			head(a.end, b.bgn).valu.typ = 0
 			a.end.next = b.bgn
 			a.end = b.end
@@ -66,7 +73,7 @@ func (this *content) region(s plan, t token) plan {
 		if j > 0 {
 			n := new(spot)
 			for k++; k < j; k++ {
-				b := same(s)
+				b = same(s)
 				head(a.end, b.bgn).valu.typ = 0
 				if t.dtl == '?' {
 					head(b.bgn, n).valu.typ = 0
@@ -87,10 +94,15 @@ func (this *content) region(s plan, t token) plan {
 			s.end.next = n
 			a.end = n
 		} else if j < 0 {
-			s = this.repeat(s, t)
-			head(a.end, s.bgn).valu.typ = 0
-			a.end.next = s.bgn
-			a.end = s.end
+			n := new(spot)
+			b.end.next = n
+			head(b.end, b.bgn).valu.typ = 0
+			if t.dtl == '?' {
+				head(b.end, n).valu.typ = 0
+			} else {
+				tail(b.end, n).valu.typ = 0
+			}
+			a.end = n
 		}
 	}
 	return a

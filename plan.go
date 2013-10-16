@@ -180,9 +180,9 @@ func reduce(self *plan, str string) {
 					rp.valu.im--
 					p = q
 				}
+				lp.path = M.next
 			}
 		}
-		lp.path = M.next
 	}
 	for lp = self.bgn; lp != nil; lp = lp.next {
 		if lp.valu.im == 0 {
