@@ -31,15 +31,16 @@ func (this *Regex) before(g []group, v plan, s []byte, k int) int {
 					j, p = 1, r.goal
 				}
 			case '@':
-				i, j = g[r.valu.unt[0]].pos, g[r.valu.unt[0]].len-1
-				if n-j <= 0 {
+				i, j = g[r.valu.unt[0]].pos, g[r.valu.unt[0]].len
+				if n-j < 0 {
 					break
 				}
-				for t := n - j - 1; j >= 0 && s[t+j] != s[i+j]; {
-					j--
+				k := j - 1
+				for t := n - j; k >= 0 && s[t+k] == s[i+k]; {
+					k--
 				}
-				if j == 0 {
-					j, p = g[r.valu.unt[0]].len, r.goal
+				if k < 0 {
+					p = r.goal
 				}
 			case '#':
 				if j = this.before(g, v, s, n); j >= 0 {
@@ -82,15 +83,16 @@ func (this *Regex) behind(g []group, v plan, s []byte, k int) int {
 					j, p = 1, r.goal
 				}
 			case '@':
-				i, j = g[r.valu.unt[0]].pos, g[r.valu.unt[0]].len-1
-				if n+j >= len(s) {
+				i, j = g[r.valu.unt[0]].pos, g[r.valu.unt[0]].len
+				if n+j > len(s) {
 					break
 				}
-				for j >= 0 && s[n+j] != s[i+j] {
-					j--
+				k := j - 1
+				for k >= 0 && s[n+k] == s[i+k] {
+					k--
 				}
-				if j == 0 {
-					j, p = g[r.valu.unt[0]].len, r.goal
+				if k < 0 {
+					p = r.goal
 				}
 			case '#':
 				if j = this.behind(g, v, s, n); j >= 0 {
@@ -133,15 +135,16 @@ func (this *Regex) entire(g []group, v plan, s []byte, k int) bool {
 					j, p = 1, r.goal
 				}
 			case '@':
-				i, j = g[r.valu.unt[0]].pos, g[r.valu.unt[0]].len-1
-				if n+j >= len(s) {
+				i, j = g[r.valu.unt[0]].pos, g[r.valu.unt[0]].len
+				if n+j > len(s) {
 					break
 				}
-				for j >= 0 && s[n+j] != s[i+j] {
-					j--
+				k := j - 1
+				for k >= 0 && s[n+k] == s[i+k] {
+					k--
 				}
-				if j == 0 {
-					j, p = g[r.valu.unt[0]].len, r.goal
+				if k < 0 {
+					p = r.goal
 				}
 			case '#':
 				if this.entire(g, v, s, n) {
