@@ -130,7 +130,7 @@ func (this *content) closed(a token, s plan) (n plan) {
 	case '>':
 		s.bgn.valu.im++
 		head(s.end, nil).valu.typ = 'E'
-		reduce(&s, "()>@")
+		reduce(&s, "()>=!+-")
 		this.sub[a.pr1] = s
 		n = twin()
 		l := head(n.bgn, n.end)
@@ -139,7 +139,7 @@ func (this *content) closed(a token, s plan) (n plan) {
 	case '=', '!':
 		s.bgn.valu.im++
 		head(s.end, nil).valu.typ = 'E'
-		reduce(&s, "()>@#")
+		reduce(&s, "()>=!+-#")
 		change(&s)
 		this.sub[a.pr1] = s
 		n = twin()
@@ -150,7 +150,7 @@ func (this *content) closed(a token, s plan) (n plan) {
 		n = anti(s)
 		n.bgn.valu.im++
 		head(n.end, nil).valu.typ = 'E'
-		reduce(&n, "()>@#")
+		reduce(&n, "()>=!+-#")
 		change(&n)
 		this.sub[a.pr1] = n
 		n = twin()
