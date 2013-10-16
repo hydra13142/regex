@@ -16,12 +16,11 @@ type Regex struct {
 }
 
 func (this *Regex) before(g []group, v plan, s []byte, k int) bool {
-	j := 0
+	j, p := 0, (*spot)(nil)
 	c, n, r := v.bgn, k, v.bgn.path
 	B := stack{blk: new(block), pnt: 0}
 	for {
-		p := (*spot)(nil)
-		for ; r != nil && p == nil; r = r.next {
+		for p = nil; r != nil && p == nil; r = r.next {
 			switch r.valu.typ {
 			case 'b':
 				if border(r.valu.unt[0], s, n) {
@@ -40,17 +39,14 @@ func (this *Regex) before(g []group, v plan, s []byte, k int) bool {
 		if p != nil {
 			B.push(c, n, r)
 			c, n, r = p, n-j, p.path
-		} else {
-			for {
-				if !B.pop(&c, &n, &r) {
-					return false
-				}
-				if r != nil {
-					break
-				}
+			continue
+		}
+		for {
+			if !B.pop(&c, &n, &r) {
+				return false
 			}
-			if r.valu.typ == '(' {
-				g[r.valu.unt[0]].len = 0
+			if r != nil {
+				break
 			}
 		}
 	}
@@ -58,12 +54,11 @@ func (this *Regex) before(g []group, v plan, s []byte, k int) bool {
 }
 
 func (this *Regex) behind(g []group, v plan, s []byte, k int) bool {
-	j := 0
+	j, p := 0, (*spot)(nil)
 	c, n, r := v.bgn, k, v.bgn.path
 	B := stack{blk: new(block), pnt: 0}
 	for {
-		p := (*spot)(nil)
-		for ; r != nil && p == nil; r = r.next {
+		for p = nil; r != nil && p == nil; r = r.next {
 			switch r.valu.typ {
 			case 'b':
 				if border(r.valu.unt[0], s, n) {
@@ -82,17 +77,14 @@ func (this *Regex) behind(g []group, v plan, s []byte, k int) bool {
 		if p != nil {
 			B.push(c, n, r)
 			c, n, r = p, n+j, p.path
-		} else {
-			for {
-				if !B.pop(&c, &n, &r) {
-					return false
-				}
-				if r != nil {
-					break
-				}
+			continue
+		}
+		for {
+			if !B.pop(&c, &n, &r) {
+				return false
 			}
-			if r.valu.typ == '(' {
-				g[r.valu.unt[0]].len = 0
+			if r != nil {
+				break
 			}
 		}
 	}
@@ -100,13 +92,12 @@ func (this *Regex) behind(g []group, v plan, s []byte, k int) bool {
 }
 
 func (this *Regex) entire(g []group, v plan, s []byte, k int) bool {
-	i, j := 0, 0
 	u := make([]group, 1)
+	i, j, p := 0, 0, (*spot)(nil)
 	c, n, r := v.bgn, k, v.bgn.path
 	B := stack{blk: new(block), pnt: 0}
 	for {
-		p := (*spot)(nil)
-		for ; r != nil && p == nil; r = r.next {
+		for p = nil; r != nil; r = r.next {
 			switch r.valu.typ {
 			case 'b':
 				if border(r.valu.unt[0], s, n) {
@@ -162,23 +153,27 @@ func (this *Regex) entire(g []group, v plan, s []byte, k int) bool {
 				g[0].len = n - k
 				return true
 			}
+			if p != nil {
+				break
+			}
 		}
 		if p != nil {
 			B.push(c, n, r)
 			c, n, r = p, n+j, p.path
-		} else {
-			for {
-				if !B.pop(&c, &n, &r) {
-					return false
-				}
-				if r != nil {
-					break
-				}
+			continue
+		}
+		for {
+			if !B.pop(&c, &n, &r) {
+				return false
 			}
 			if r.valu.typ == '(' {
 				g[r.valu.unt[0]].len = 0
 			}
+			if r.next != nil {
+				break
+			}
 		}
+		r = r.next
 	}
 	return true
 }
