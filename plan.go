@@ -223,11 +223,21 @@ func change(self *plan) {
 	for t := self.bgn; t != nil; t = t.next {
 		l := &line{next: t.path}
 		for q, p := l, l.next; p != nil; q, p = p, p.next {
-			if p.valu.typ == 0 {
+			if p.valu.typ == 'E' {
 				q.next = p.next
 				p.next = l.next
 				t.path = p
 				break
+			}
+		}
+	}
+}
+
+func update(self *plan) {
+	for t := self.bgn; t != nil; t = t.next {
+		for p := t.path; p != nil; p = p.next {
+			if p.valu.typ == '(' || p.valu.typ == ')' {
+				p.valu.typ = 0
 			}
 		}
 	}

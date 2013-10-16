@@ -158,7 +158,9 @@ func (this *content) closed(a token, s plan) (n plan) {
 		l.valu.typ = byte(a.dtl)
 		l.valu.unt[0] = uint32(a.pr1)
 	default:
-		this.grp[a.pr1].pl = same(s)
+		n = same(s)
+		update(&n)
+		this.grp[a.pr1].pl = n
 		this.grp[a.pr1].ac = true
 		n.bgn = new(spot)
 		n.bgn.next = s.bgn
