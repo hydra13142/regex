@@ -37,7 +37,7 @@ func border(b uint32, s []byte, n int) bool {
 			if label.get(s[n]) {
 				return true
 			}
-		} else
+		} else {
 			if n == len(s) || !label.get(s[n]) {
 				return true
 			}
@@ -47,7 +47,7 @@ func border(b uint32, s []byte, n int) bool {
 			if !label.get(s[n]) {
 				return true
 			}
-		} else
+		} else {
 			if n < len(s) && label.get(s[n]) {
 				return true
 			}
