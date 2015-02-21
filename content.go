@@ -41,9 +41,9 @@ func (this *content) atomic(t token) plan {
 }
 
 func (this *content) check(t []token) bool {
-	this.grp =  nil
-	this.ptn =  nil
-	this.sub =  nil
+	this.grp = nil
+	this.ptn = nil
+	this.sub = nil
 	r := token{'(', 0, unit{}, 0, 0}
 	i, v, k, u := 0, 0, 1, 1
 	q := r

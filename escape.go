@@ -14,6 +14,22 @@ func decode(u *unit, s []byte, c *int) int {
 		}
 		i = 2
 		switch s[1] {
+		case 's':
+			u.add(space)
+		case 'S':
+			u.add(not(space))
+		case 'c':
+			u.add(alpha)
+		case 'C':
+			u.add(not(alpha))
+		case 'd':
+			u.add(digit)
+		case 'D':
+			u.add(not(digit))
+		case 'w':
+			u.add(label)
+		case 'W':
+			u.add(not(label))
 		case 0x0:
 			*c = -1
 			return 0
@@ -35,22 +51,6 @@ func decode(u *unit, s []byte, c *int) int {
 		case 'f':
 			n = '\f'
 			u.set(byte(n))
-		case 's':
-			u.add(space)
-		case 'S':
-			u.add(not(space))
-		case 'c':
-			u.add(alpha)
-		case 'C':
-			u.add(not(alpha))
-		case 'd':
-			u.add(digit)
-		case 'D':
-			u.add(not(digit))
-		case 'w':
-			u.add(label)
-		case 'W':
-			u.add(not(label))
 		case 'x':
 			i = 2 + hex(&n, s[2:], 2)
 			if i == 2 {

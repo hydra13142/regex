@@ -14,24 +14,8 @@ func Compile(s string) *Regex {
 	return r
 }
 
-// try to match just at start
-func (this *Regex) Test(s []byte) [][]byte {
-	if this == nil {
-		return nil
-	}
-	g := make([]group, this.grp)
-	if !this.entire(g, this.dad, s, 0) {
-		return nil
-	}
-	x := make([][]byte, this.grp)
-	for i, u := range g {
-		x[i] = s[u.pos : u.pos+u.len]
-	}
-	return x
-}
-
 // try to find the first match
-func (this *Regex) Find(s []byte) [][]byte {
+func (this *Regex) Find(s []byte) []byte {
 	if this == nil {
 		return nil
 	}
@@ -44,23 +28,62 @@ func (this *Regex) Find(s []byte) [][]byte {
 	if i >= len(s) {
 		return nil
 	}
-	x := make([][]byte, this.grp)
-	for i, u := range g {
-		x[i] = s[u.pos : u.pos+u.len]
-	}
-	return x
+	return s[g[0].pos : g[0].pos+g[0].len]
 }
 
 // try to find all match, which don't overlap
-func (this *Regex) FindAll(s []byte) [][][]byte {
+func (this *Regex) FindAll(s []byte, n int) (w [][]byte) {
 	if this == nil {
 		return nil
 	}
 	a := make([]group, this.grp*2)
 	g := a[:this.grp]
 	G := a[this.grp:]
-	w := make([][][]byte, 0, 12)
-	for i := 0; i < len(s); {
+	for i, j := 0, 0; i < len(s); {
+		copy(g, G)
+		if this.entire(g, this.dad, s, i) {
+			w = append(w, s[g[0].pos:g[0].pos+g[0].len])
+			if j++; j == n {
+				break
+			}
+			i += g[0].len
+		} else {
+			i++
+		}
+	}
+	return w
+}
+
+// try to find the first match with submatch
+func (this *Regex) FindSubmatch(s []byte) (w [][]byte) {
+	if this == nil {
+		return nil
+	}
+	i, g := 0, make([]group, this.grp)
+	for ; i < len(s); i++ {
+		if this.entire(g, this.dad, s, i) {
+			break
+		}
+	}
+	if i >= len(s) {
+		return nil
+	}
+	w = make([][]byte, this.grp)
+	for i, u := range g {
+		w[i] = s[u.pos : u.pos+u.len]
+	}
+	return w
+}
+
+// try to find all match with submatch, which don't overlap
+func (this *Regex) FindAllSubmatch(s []byte, n int) (w [][][]byte) {
+	if this == nil {
+		return nil
+	}
+	a := make([]group, this.grp*2)
+	g := a[:this.grp]
+	G := a[this.grp:]
+	for i, j := 0, 0; i < len(s); {
 		copy(g, G)
 		if this.entire(g, this.dad, s, i) {
 			x := make([][]byte, this.grp)
@@ -68,56 +91,51 @@ func (this *Regex) FindAll(s []byte) [][][]byte {
 				x[i] = s[u.pos : u.pos+u.len]
 			}
 			w = append(w, x)
-			i += len(x[0])
+			if j++; j == n {
+				break
+			}
+			i += g[0].len
 		} else {
 			i++
 		}
 	}
-	if len(w) == 0 {
-		w = nil
-	}
 	return w
 }
 
-// like Test
-func (this *Regex) TestString(s string) []string {
-	y := this.Test([]byte(s))
-	if y == nil {
-		return nil
-	}
-	x := make([]string, this.grp)
-	for i, u := range y {
-		x[i] = string(u)
-	}
-	return x
+// like Find
+func (this *Regex) FindString(s string) string {
+	return string(this.Find([]byte(s)))
 }
 
-// like Find
-func (this *Regex) FindString(s string) []string {
+// like FindSubmatch
+func (this *Regex) FindStringSubmatch(s string) (w []string) {
 	y := this.Find([]byte(s))
 	if y == nil {
 		return nil
 	}
-	x := make([]string, this.grp)
+	w = make([]string, this.grp)
 	for i, u := range y {
-		x[i] = string(u)
+		w[i] = string(u)
 	}
-	return x
+	return w
 }
 
 // like FindAll
-func (this *Regex) FindAllString(s string) [][]string {
-	v := this.FindAll([]byte(s))
-	if v == nil {
-		return nil
+func (this *Regex) FindAllString(s string, n int) (w []string) {
+	for _, y := range this.FindAll([]byte(s), n) {
+		w = append(w, string(y))
 	}
-	w := make([][]string, len(v))
-	for i, y := range v {
+	return w
+}
+
+// like FindAllSubmatch
+func (this *Regex) FindAllStringSubmatch(s string, n int) (w [][]string) {
+	for _, y := range this.FindAllSubmatch([]byte(s), n) {
 		x := make([]string, this.grp)
 		for j, t := range y {
 			x[j] = string(t)
 		}
-		w[i] = x
+		w = append(w, x)
 	}
 	return w
 }
